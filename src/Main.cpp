@@ -35,15 +35,17 @@ int main(int argc, const char **argv) {
   }
   tooling::RefactoringTool Tool(*Compilations, SourcePaths);
 
-  std::unique_ptr<tooling::FrontendActionFactory> Factory;
+  auto RunFinder = [&](ast_matchers::MatchFinder *Finder) -> int {
+    auto Factory = tooling::newFrontendActionFactory(Finder);
+    if (Dry) {
+      return Tool.run(Factory.get());
+    } else {
+      return Tool.runAndSave(Factory.get());
+    }
+  };
 
-  Factory.reset(createReplaceClass(Tool));
-
-  assert(!Factory && "Action was not properly created!");
-
-  if (Dry) {
-    return Tool.run(Factory.get());
-  } else {
-    return Tool.runAndSave(Factory.get());
-  }
+  // Have a method do the hard work.
+  // See https://clang.llvm.org/docs/LibASTMatchersReference.html
+  // and clang -Xclang -ast-dump -fsyntax-only example.c
+  return replaceMegaMolCalls(Tool, RunFinder);
 }

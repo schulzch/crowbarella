@@ -19,13 +19,17 @@ project(Crowbarella LANGUAGES CXX)
 file(GLOB_RECURSE SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.cpp")
 file(GLOB_RECURSE HEADER_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "src/*.h")
 
-# Add target definition.
+# Add tool target.
 add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE clangTooling )
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${LLVM_DEFINITIONS} ${CLANG_DEFINITIONS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS})
 
+# Add test target.
+file(GLOB_RECURSE TEST_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "test/*.cpp" "test/*.h")
+add_executable(test_MegaMolCall "${CMAKE_CURRENT_SOURCE_DIR}/test/MegaMolCall.cpp")
+
 # Format sources.
 target_clang_format(${PROJECT_NAME}
   STYLE "${CMAKE_SOURCE_DIR}/.clang-format"
-  FILES ${HEADER_FILES} ${SOURCE_FILES})
+  FILES ${HEADER_FILES} ${SOURCE_FILES} ${TEST_FILES})
